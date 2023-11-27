@@ -463,3 +463,7 @@ dask-worker-space/
 *.pub
 *.rdp
 *_rsa
+tests/testlightgbm
+higgs.test
+higgs.train
+LightGBM_model.txt
