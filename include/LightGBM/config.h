@@ -138,8 +138,10 @@ struct Config {
   // descl2 = ``mape``, `MAPE loss <https://en.wikipedia.org/wiki/Mean_absolute_percentage_error>`__, aliases: ``mean_absolute_percentage_error``
   // descl2 = ``gamma``, Gamma regression with log-link. It might be useful, e.g., for modeling insurance claims severity, or for any target that might be `gamma-distributed <https://en.wikipedia.org/wiki/Gamma_distribution#Occurrence_and_applications>`__
   // descl2 = ``tweedie``, Tweedie regression with log-link. It might be useful, e.g., for modeling total loss in insurance, or for any target that might be `tweedie-distributed <https://en.wikipedia.org/wiki/Tweedie_distribution#Occurrence_and_applications>`__
+  // descl2 = ``exponential_family_regression``, Exponential family regression `<https://en.wikipedia.org/wiki/Exponential_family>` with user specified link function.
   // desc = binary classification application
   // descl2 = ``binary``, binary `log loss <https://en.wikipedia.org/wiki/Cross_entropy>`__ classification (or logistic regression)
+  // descl2 = ``exponential_family_binary``, Exponential family classification `<https://en.wikipedia.org/wiki/Exponential_family>` with user specified link function.
   // descl2 = requires labels in {0, 1}; see ``cross-entropy`` application for general probability labels in [0, 1]
   // desc = multi-class classification application
   // descl2 = ``multiclass``, `softmax <https://en.wikipedia.org/wiki/Softmax_function>`__ objective function, aliases: ``softmax``
@@ -952,6 +954,14 @@ struct Config {
   // desc = set this closer to ``1`` to shift towards a **Poisson** distribution
   double tweedie_variance_power = 1.5;
 
+  // desc = used only in ``exponential_family`` ``regression`` or ``classification`` application
+  // desc = used to control the exponential family distribution
+  std::string exponential_family_distribution = "bernoulli";
+
+  // desc = used only in ``exponential_family`` ``regression`` or ``classification`` application
+  // desc = used to control the exponential family link function
+  std::string exponential_family_link = "canonical";
+
   // check = >0
   // desc = used only in ``lambdarank`` application
   // desc = controls the number of top-results to focus on during training, refer to "truncation level" in the Sec. 3 of `LambdaMART paper <https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/MSR-TR-2010-82.pdf>`__
@@ -1000,6 +1010,7 @@ struct Config {
   // descl2 = ``gamma``, negative log-likelihood for **Gamma** regression
   // descl2 = ``gamma_deviance``, residual deviance for **Gamma** regression
   // descl2 = ``tweedie``, negative log-likelihood for **Tweedie** regression
+  // descl2 = ``exponential_family``, negative log-likelihood for **#Exponential family** regression
   // descl2 = ``ndcg``, `NDCG <https://en.wikipedia.org/wiki/Discounted_cumulative_gain#Normalized_DCG>`__, aliases: ``lambdarank``, ``rank_xendcg``, ``xendcg``, ``xe_ndcg``, ``xe_ndcg_mart``, ``xendcg_mart``
   // descl2 = ``map``, `MAP <https://makarandtapaswi.wordpress.com/2012/07/02/intuition-behind-average-precision-and-map/>`__, aliases: ``mean_average_precision``
   // descl2 = ``auc``, `AUC <https://en.wikipedia.org/wiki/Receiver_operating_characteristic#Area_under_the_curve>`__

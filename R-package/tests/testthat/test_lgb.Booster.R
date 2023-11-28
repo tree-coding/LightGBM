@@ -923,6 +923,8 @@ test_that("all parameters are stored correctly with save_model_to_string()", {
         , "[fair_c: 1]"
         , "[poisson_max_delta_step: 0.7]"
         , "[tweedie_variance_power: 1.5]"
+        , "[exponential_family_distribution = bernoulli]"
+        , "[exponential_family_link = canonical]"
         , "[lambdarank_truncation_level: 30]"
         , "[lambdarank_norm: 1]"
         , "[label_gain: ]"

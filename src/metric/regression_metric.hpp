@@ -111,8 +111,8 @@ class RegressionMetric: public Metric {
   /*! \brief Sum weights */
   double sum_weights_;
   /*! \brief Name of this test set */
-  Config config_;
   std::vector<std::string> name_;
+  Config config_;
 };
 
 /*! \brief RMSE loss for regression task */
@@ -314,6 +314,31 @@ class TweedieMetric : public RegressionMetric<TweedieMetric> {
   }
   inline static const char* Name() {
     return "tweedie";
+  }
+};
+
+/*! \brief exponentail family loss for regression task */
+class ExponentialFamilyRegressionMetric : public RegressionMetric<ExponentialFamilyRegressionMetric> {
+ public:
+  explicit ExponentialFamilyRegressionMetric(const Config& config) :RegressionMetric<ExponentialFamilyRegressionMetric>(config) {
+  }
+
+  inline static double LossOnPoint(label_t label, double score, const Config& config) {
+    if (config.exponential_family_link == "canonical" || config.exponential_family_link == "identity") {
+      return (score - label)*(score - label);
+    }
+    Log::Fatal("Cannot find expoential_link_function '%s'.", config.exponential_family_link.c_str());
+    return 0.0;
+    
+  }
+
+  inline static double AverageLoss(double sum_loss, double sum_weights) {
+    // need sqrt the result for RMSE loss
+    return std::sqrt(sum_loss / sum_weights);
+  }
+
+  inline static const char* Name() {
+    return "exponential_family_regression_metric";
   }
 };
 

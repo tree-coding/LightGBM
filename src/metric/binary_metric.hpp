@@ -9,8 +9,11 @@
 #include <LightGBM/utils/common.h>
 #include <LightGBM/utils/log.h>
 
+#define _USE_MATH_DEFINES
+
 #include <string>
 #include <algorithm>
+#include <cmath>
 #include <sstream>
 #include <vector>
 
@@ -23,7 +26,7 @@ namespace LightGBM {
 template<typename PointWiseLossCalculator>
 class BinaryMetric: public Metric {
  public:
-  explicit BinaryMetric(const Config&) {
+  explicit BinaryMetric(const Config& config) :config_(config)  {
   }
 
   virtual ~BinaryMetric() {
@@ -64,13 +67,13 @@ class BinaryMetric: public Metric {
         #pragma omp parallel for num_threads(OMP_NUM_THREADS()) schedule(static) reduction(+:sum_loss)
         for (data_size_t i = 0; i < num_data_; ++i) {
           // add loss
-          sum_loss += PointWiseLossCalculator::LossOnPoint(label_[i], score[i]);
+          sum_loss += PointWiseLossCalculator::LossOnPoint(label_[i], score[i], config_);
         }
       } else {
         #pragma omp parallel for num_threads(OMP_NUM_THREADS()) schedule(static) reduction(+:sum_loss)
         for (data_size_t i = 0; i < num_data_; ++i) {
           // add loss
-          sum_loss += PointWiseLossCalculator::LossOnPoint(label_[i], score[i]) * weights_[i];
+          sum_loss += PointWiseLossCalculator::LossOnPoint(label_[i], score[i], config_) * weights_[i];
         }
       }
     } else {
@@ -80,7 +83,7 @@ class BinaryMetric: public Metric {
           double prob = 0;
           objective->ConvertOutput(&score[i], &prob);
           // add loss
-          sum_loss += PointWiseLossCalculator::LossOnPoint(label_[i], prob);
+          sum_loss += PointWiseLossCalculator::LossOnPoint(label_[i], prob, config_);
         }
       } else {
         #pragma omp parallel for num_threads(OMP_NUM_THREADS()) schedule(static) reduction(+:sum_loss)
@@ -88,7 +91,7 @@ class BinaryMetric: public Metric {
           double prob = 0;
           objective->ConvertOutput(&score[i], &prob);
           // add loss
-          sum_loss += PointWiseLossCalculator::LossOnPoint(label_[i], prob) * weights_[i];
+          sum_loss += PointWiseLossCalculator::LossOnPoint(label_[i], prob, config_) * weights_[i];
         }
       }
     }
@@ -107,6 +110,7 @@ class BinaryMetric: public Metric {
   double sum_weights_;
   /*! \brief Name of test set */
   std::vector<std::string> name_;
+  Config config_;
 };
 
 /*!
@@ -116,7 +120,7 @@ class BinaryLoglossMetric: public BinaryMetric<BinaryLoglossMetric> {
  public:
   explicit BinaryLoglossMetric(const Config& config) :BinaryMetric<BinaryLoglossMetric>(config) {}
 
-  inline static double LossOnPoint(label_t label, double prob) {
+  inline static double LossOnPoint(label_t label, double prob, const Config&) {
     if (label <= 0) {
       if (1.0f - prob > kEpsilon) {
         return -std::log(1.0f - prob);
@@ -133,6 +137,31 @@ class BinaryLoglossMetric: public BinaryMetric<BinaryLoglossMetric> {
     return "binary_logloss";
   }
 };
+
+/*!
+* \brief Log loss metric for exponentail family binary task.
+*/
+class ExponentialFamilyBinaryMetric: public BinaryMetric<ExponentialFamilyBinaryMetric> {
+ public:
+  explicit ExponentialFamilyBinaryMetric(const Config& config) :BinaryMetric<ExponentialFamilyBinaryMetric>(config) {}
+
+  inline static double LossOnPoint(label_t label, double prob, const Config&) {
+    if (label <= 0) {
+      if (1.0f - prob > kEpsilon) {
+        return -std::log(1.0f - prob);
+      }
+    } else {
+      if (prob > kEpsilon) {
+        return -std::log(prob);
+      }
+    }
+    return -std::log(kEpsilon);
+  }
+
+  inline static const char* Name() {
+    return "exponential_family_binary_metric";
+  }
+};
 /*!
 * \brief Error rate metric for binary classification task.
 */
@@ -140,7 +169,7 @@ class BinaryErrorMetric: public BinaryMetric<BinaryErrorMetric> {
  public:
   explicit BinaryErrorMetric(const Config& config) :BinaryMetric<BinaryErrorMetric>(config) {}
 
-  inline static double LossOnPoint(label_t label, double prob) {
+  inline static double LossOnPoint(label_t label, double prob, const Config&) {
     if (prob <= 0.5f) {
       return label > 0;
     } else {

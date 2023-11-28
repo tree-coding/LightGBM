@@ -73,7 +73,7 @@ Core Parameters
 
    -  **Note**: can be used only in CLI version; for language-specific packages you can use the correspondent functions
 
--  ``objective`` :raw-html:`<a id="objective" title="Permalink to this parameter" href="#objective">&#x1F517;&#xFE0E;</a>`, default = ``regression``, type = enum, options: ``regression``, ``regression_l1``, ``huber``, ``fair``, ``poisson``, ``quantile``, ``mape``, ``gamma``, ``tweedie``, ``binary``, ``multiclass``, ``multiclassova``, ``cross_entropy``, ``cross_entropy_lambda``, ``lambdarank``, ``rank_xendcg``, aliases: ``objective_type``, ``app``, ``application``, ``loss``
+-  ``objective`` :raw-html:`<a id="objective" title="Permalink to this parameter" href="#objective">&#x1F517;&#xFE0E;</a>`, default = ``regression``, type = enum, options: ``regression``, ``regression_l1``, ``huber``, ``fair``, ``poisson``, ``quantile``, ``mape``, ``gamma``, ``tweedie``, ``exponential_family``, ``binary``, ``multiclass``, ``multiclassova``, ``cross_entropy``, ``cross_entropy_lambda``, ``lambdarank``, ``rank_xendcg``, aliases: ``objective_type``, ``app``, ``application``, ``loss``
 
    -  regression application
 
@@ -95,9 +95,13 @@ Core Parameters
 
       -  ``tweedie``, Tweedie regression with log-link. It might be useful, e.g., for modeling total loss in insurance, or for any target that might be `tweedie-distributed <https://en.wikipedia.org/wiki/Tweedie_distribution#Occurrence_and_applications>`__
 
+      - ``exponential_family_regression``, Exponential family regression `<https://en.wikipedia.org/wiki/Exponential_family>` with user specified link function.
+
    -  binary classification application
 
       -  ``binary``, binary `log loss <https://en.wikipedia.org/wiki/Cross_entropy>`__ classification (or logistic regression)
+
+      - ``exponential_family_binary``, Exponential family classification `<https://en.wikipedia.org/wiki/Exponential_family>` with user specified link function.
 
       -  requires labels in {0, 1}; see ``cross-entropy`` application for general probability labels in [0, 1]
 
@@ -1113,6 +1117,10 @@ Objective Parameters
 
    -  set this closer to ``1`` to shift towards a **Poisson** distribution
 
+-  ``exponential_family_distribution``, default = ``"bernoulli"``, type = string
+
+-  ``exponential_family_link``, default = ``"canonical"``, type = string
+
 -  ``lambdarank_truncation_level`` :raw-html:`<a id="lambdarank_truncation_level" title="Permalink to this parameter" href="#lambdarank_truncation_level">&#x1F517;&#xFE0E;</a>`, default = ``30``, type = int, constraints: ``lambdarank_truncation_level > 0``
 
    -  used only in ``lambdarank`` application
@@ -1175,6 +1183,8 @@ Metric Parameters
       -  ``gamma_deviance``, residual deviance for **Gamma** regression
 
       -  ``tweedie``, negative log-likelihood for **Tweedie** regression
+
+      -  ``exponential_family``, negative log-likelihood for **Exponentail Family** regression or classification.
 
       -  ``ndcg``, `NDCG <https://en.wikipedia.org/wiki/Discounted_cumulative_gain#Normalized_DCG>`__, aliases: ``lambdarank``, ``rank_xendcg``, ``xendcg``, ``xe_ndcg``, ``xe_ndcg_mart``, ``xendcg_mart``
 

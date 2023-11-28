@@ -76,6 +76,10 @@ Metric* Metric::CreateMetric(const std::string& type, const Config& config) {
       return new CUDAGammaDevianceMetric(config);
     } else if (type == std::string("tweedie")) {
       return new CUDATweedieMetric(config);
+    } else if (type == std::string("exponential_family_regression")) {
+      return new CUDAExponentialFamilyRegressionMetric(config);
+    } else if (type == std::string("exponential_family_binary")) {
+      return new CUDAExponentialFamilyBinaryMetric(config);
     }
   } else {
   #endif  // USE_CUDA
@@ -125,6 +129,10 @@ Metric* Metric::CreateMetric(const std::string& type, const Config& config) {
       return new GammaDevianceMetric(config);
     } else if (type == std::string("tweedie")) {
       return new TweedieMetric(config);
+    } else if (type == std::string("exponential_family_regression")) {
+      return new ExponentialFamilyRegressionMetric(config);
+    } else if (type == std::string("exponential_family_binary")) {
+      return new ExponentialFamilyBinaryMetric(config);
     }
   #ifdef USE_CUDA
   }

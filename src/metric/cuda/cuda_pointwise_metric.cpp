@@ -41,6 +41,8 @@ template void CUDAPointwiseMetricInterface<MAPEMetric, CUDAMAPEMetric>::Init(con
 template void CUDAPointwiseMetricInterface<GammaMetric, CUDAGammaMetric>::Init(const Metadata& metadata, data_size_t num_data);
 template void CUDAPointwiseMetricInterface<GammaDevianceMetric, CUDAGammaDevianceMetric>::Init(const Metadata& metadata, data_size_t num_data);
 template void CUDAPointwiseMetricInterface<TweedieMetric, CUDATweedieMetric>::Init(const Metadata& metadata, data_size_t num_data);
+template void CUDAPointwiseMetricInterface<ExponentialFamilyBinaryMetric, CUDAExponentialFamilyBinaryMetric>::Init(const Metadata& metadata, data_size_t num_data);
+template void CUDAPointwiseMetricInterface<ExponentialFamilyRegressionMetric, CUDAExponentialFamilyRegressionMetric>::Init(const Metadata& metadata, data_size_t num_data);
 
 }  // namespace LightGBM
 

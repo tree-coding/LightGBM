@@ -756,6 +756,127 @@ class RegressionTweedieLoss: public RegressionPoissonLoss {
   double rho_;
 };
 
+class RegressionExponentialFamilyLoss: public ObjectiveFunction {
+ public:
+  explicit RegressionExponentialFamilyLoss(const Config& config)
+      : deterministic_(config.deterministic), distribution_(config.exponential_family_distribution), link_(config.exponential_family_link)
+  {
+    sqrt_ = config.reg_sqrt;
+    
+    if (distribution_ != "guassian") {
+      Log::Fatal("Unknown expenential regression distribution %s", distribution_.c_str());
+    }
+
+    if (link_ != "canonical" && link_ != "identity") {
+      Log::Fatal("Unknown expenential regression link function %s", link_.c_str());
+    }
+  }
+
+  explicit RegressionExponentialFamilyLoss(const std::vector<std::string>& strs)
+      : deterministic_(false) {
+    sqrt_ = false;
+    for (auto str : strs) {
+      if (str == std::string("sqrt")) {
+        sqrt_ = true;
+      }
+    }
+  }
+
+  ~RegressionExponentialFamilyLoss() {
+  }
+
+  void Init(const Metadata& metadata, data_size_t num_data) override {
+    num_data_ = num_data;
+    label_ = metadata.label();
+    if (sqrt_) {
+      trans_label_.resize(num_data_);
+      #pragma omp parallel for num_threads(OMP_NUM_THREADS()) schedule(static)
+      for (data_size_t i = 0; i < num_data; ++i) {
+        trans_label_[i] = Common::Sign(label_[i]) * std::sqrt(std::fabs(label_[i]));
+      }
+      label_ = trans_label_.data();
+    }
+    weights_ = metadata.weights();
+  }
+
+  void GetGradients(const double* score, score_t* gradients,
+                    score_t* hessians) const override {
+    if (weights_ == nullptr) {
+      #pragma omp parallel for num_threads(OMP_NUM_THREADS()) schedule(static)
+      for (data_size_t i = 0; i < num_data_; ++i) {
+        gradients[i] = static_cast<score_t>(score[i] - label_[i]);
+        hessians[i] = 1.0f;
+      }
+    } else {
+      #pragma omp parallel for num_threads(OMP_NUM_THREADS()) schedule(static)
+      for (data_size_t i = 0; i < num_data_; ++i) {
+        gradients[i] = static_cast<score_t>(static_cast<score_t>((score[i] - label_[i])) * weights_[i]);
+        hessians[i] = static_cast<score_t>(weights_[i]);
+      }
+    }
+  }
+
+  const char* GetName() const override {
+    return "exponential_family";
+  }
+
+  void ConvertOutput(const double* input, double* output) const override {
+    if (sqrt_) {
+      output[0] = Common::Sign(input[0]) * input[0] * input[0];
+    } else {
+      output[0] = input[0];
+    }
+  }
+
+  std::string ToString() const override {
+    std::stringstream str_buf;
+    str_buf << GetName() << " ";
+    str_buf << "distribution:" << distribution_ << " ";
+    str_buf << "link:" << link_;
+    return str_buf.str();
+  }
+
+  bool IsConstantHessian() const override {
+    if (weights_ == nullptr) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  double BoostFromScore(int) const override {
+    double suml = 0.0f;
+    double sumw = 0.0f;
+    if (weights_ != nullptr) {
+      #pragma omp parallel for num_threads(OMP_NUM_THREADS()) schedule(static) reduction(+:suml, sumw) if (!deterministic_)
+      for (data_size_t i = 0; i < num_data_; ++i) {
+        suml += static_cast<double>(label_[i]) * weights_[i];
+        sumw += weights_[i];
+      }
+    } else {
+      sumw = static_cast<double>(num_data_);
+      #pragma omp parallel for num_threads(OMP_NUM_THREADS()) schedule(static) reduction(+:suml) if (!deterministic_)
+      for (data_size_t i = 0; i < num_data_; ++i) {
+        suml += label_[i];
+      }
+    }
+    return suml / sumw;
+  }
+
+ protected:
+  bool sqrt_;
+  /*! \brief Number of data */
+  data_size_t num_data_;
+  /*! \brief Pointer of label */
+  const label_t* label_;
+  /*! \brief Pointer of weights */
+  const label_t* weights_;
+  std::vector<label_t> trans_label_;
+  const bool deterministic_;
+  const std::string distribution_;
+  const std::string link_;
+};
+
 #undef PercentileFun
 #undef WeightedPercentileFun
 

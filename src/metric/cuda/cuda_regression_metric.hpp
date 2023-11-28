@@ -208,6 +208,25 @@ class CUDATweedieMetric : public CUDARegressionMetricInterface<TweedieMetric, CU
   const double tweedie_variance_power_;
 };
 
+class CUDAExponentialFamilyRegressionMetric: public CUDARegressionMetricInterface<ExponentialFamilyRegressionMetric, CUDAExponentialFamilyRegressionMetric> {
+ public:
+  explicit CUDAExponentialFamilyRegressionMetric(const Config& config);
+
+  virtual ~CUDAExponentialFamilyRegressionMetric() {}
+
+  __device__ inline static double MetricOnPointCUDA(label_t label, double score, double /*alpha*/) {
+    return (score - label) * (score - label);
+  }
+
+  double GetParamFromConfig() const override {
+    return 0.0; //TODO need a 2-way map between family + link and integer (as a double)
+  }
+
+ private:
+  const std::string exponential_family_distribution_;
+  const std::string exponential_family_link_;
+};
+
 }  // namespace LightGBM
 
 #endif  // USE_CUDA

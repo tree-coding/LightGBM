@@ -20,6 +20,8 @@
             , "gamma" = FALSE
             , "gamma_deviance" = FALSE
             , "tweedie" = FALSE
+            , "exponential_family_regression" = FALSE
+            , "exponential_family_binary" = FALSE
             , "ndcg" = TRUE
             , "map" = TRUE
             , "auc" = TRUE

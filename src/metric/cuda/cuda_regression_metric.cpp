@@ -47,6 +47,8 @@ CUDAGammaDevianceMetric::CUDAGammaDevianceMetric(const Config& config): CUDARegr
 
 CUDATweedieMetric::CUDATweedieMetric(const Config& config): CUDARegressionMetricInterface<TweedieMetric, CUDATweedieMetric>(config) , tweedie_variance_power_(config.tweedie_variance_power) {}
 
+CUDAExponentialFamilyRegressionMetric::CUDAExponentialFamilyRegressionMetric(const Config& config): CUDARegressionMetricInterface<ExponentialFamilyRegressionMetric, CUDAExponentialFamilyRegressionMetric>(config), exponential_family_distribution_(config.exponential_family_distribution), exponential_family_link_(config.exponential_family_link) {}
+
 }  // namespace LightGBM
 
 #endif  // USE_CUDA

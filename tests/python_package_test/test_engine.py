@@ -1680,6 +1680,8 @@ def test_all_expected_params_are_written_out_to_model_text(tmp_path):
         "[alpha: 0.9]",
         "[fair_c: 1]",
         "[poisson_max_delta_step: 0.7]",
+        "[exponential_family_distribution = bernoulli]",
+        "[exponential_family_link = canonical]",
         "[tweedie_variance_power: 1.5]",
         "[lambdarank_truncation_level: 30]",
         "[lambdarank_norm: 1]",

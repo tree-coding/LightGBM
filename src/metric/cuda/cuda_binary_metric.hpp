@@ -50,6 +50,35 @@ class CUDABinaryLoglossMetric: public CUDABinaryMetricInterface<BinaryLoglossMet
   }
 };
 
+class CUDAExponentialFamilyBinaryMetric: public CUDABinaryMetricInterface<ExponentialFamilyBinaryMetric, CUDAExponentialFamilyBinaryMetric> {
+ public:
+  explicit CUDAExponentialFamilyBinaryMetric(const Config& config);
+
+  virtual ~CUDAExponentialFamilyBinaryMetric() {}
+
+  __device__ static double MetricOnPointCUDA(label_t label, double score, const double /*param*/) {
+    // score should have been converted to probability
+    if (label <= 0) {
+      if (1.0f - score > kEpsilon) {
+        return -log(1.0f - score);
+      }
+    } else {
+      if (score > kEpsilon) {
+        return -log(score);
+      }
+    }
+    return -log(kEpsilon);
+  }
+
+  double GetParamFromConfig() const override {
+    return 0.0; //TODO need a 2-way map between family + link and integer (as a double)
+  }
+
+ private:
+  const std::string exponential_family_distribution_;
+  const std::string exponential_family_link_;
+};
+
 }  // namespace LightGBM
 
 #endif  // USE_CUDA

@@ -229,6 +229,8 @@ LightGBM supports the following metrics:
 
 -  Tweedie
 
+- Exponential family
+
 For more details, please refer to `Parameters <./Parameters.rst#metric-parameters>`__.
 
 Other Features

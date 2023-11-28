@@ -59,6 +59,12 @@ ObjectiveFunction* ObjectiveFunction::CreateObjectiveFunction(const std::string&
     } else if (type == std::string("tweedie")) {
       Log::Warning("Objective tweedie is not implemented in cuda version. Fall back to boosting on CPU.");
       return new RegressionTweedieLoss(config);
+    } else if (type == std::string("exponential_family_regression")) {
+      Log::Warning("Objective exponential family regression is not implemented in cuda version. Fall back to boosting on CPU.");
+      return new RegressionExponentialFamilyLoss(config);
+    } else if (type == std::string("exponential_family_binary")) {
+      Log::Warning("Objective exponential family binary is not implemented in cuda version. Fall back to boosting on CPU.");
+      return new BinaryExponentialFamilyLoss(config);
     } else if (type == std::string("custom")) {
       Log::Warning("Using customized objective with cuda. This requires copying gradients from CPU to GPU, which can be slow.");
       return nullptr;
@@ -97,6 +103,10 @@ ObjectiveFunction* ObjectiveFunction::CreateObjectiveFunction(const std::string&
       return new RegressionGammaLoss(config);
     } else if (type == std::string("tweedie")) {
       return new RegressionTweedieLoss(config);
+    } else if (type == std::string("exponential_family_regression")) {
+      return new RegressionExponentialFamilyLoss(config);
+    } else if (type == std::string("exponential_family_binary")) {
+      return new BinaryExponentialFamilyLoss(config);
     } else if (type == std::string("custom")) {
       return nullptr;
     }
@@ -142,6 +152,10 @@ ObjectiveFunction* ObjectiveFunction::CreateObjectiveFunction(const std::string&
     return new RegressionGammaLoss(strs);
   } else if (type == std::string("tweedie")) {
     return new RegressionTweedieLoss(strs);
+  } else if (type == std::string("exponential_family_regression")) {
+    return new RegressionExponentialFamilyLoss(strs);
+  } else if (type == std::string("exponential_family_binary")) {
+    return new BinaryExponentialFamilyLoss(strs);
   } else if (type == std::string("custom")) {
     return nullptr;
   }

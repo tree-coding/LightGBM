@@ -72,7 +72,8 @@ template void CUDAPointwiseMetricInterface<MAPEMetric, CUDAMAPEMetric>::LaunchEv
 template void CUDAPointwiseMetricInterface<GammaMetric, CUDAGammaMetric>::LaunchEvalKernel(const double* score, double* sum_loss, double* sum_weight) const;
 template void CUDAPointwiseMetricInterface<GammaDevianceMetric, CUDAGammaDevianceMetric>::LaunchEvalKernel(const double* score, double* sum_loss, double* sum_weight) const;
 template void CUDAPointwiseMetricInterface<TweedieMetric, CUDATweedieMetric>::LaunchEvalKernel(const double* score, double* sum_loss, double* sum_weight) const;
-
+template void CUDAPointwiseMetricInterface<ExponentialFamilyRegressionMetric, CUDAExponentialFamilyRegressionMetric>::LaunchEvalKernel(const double* score, double* sum_loss, double* sum_weight) const;
+template void CUDAPointwiseMetricInterface<ExponentialFamilyBinaryMetric, CUDAExponentialFamilyBinaryMetric>::LaunchEvalKernel(const double* score, double* sum_loss, double* sum_weight) const;
 }  // namespace LightGBM
 
 #endif  // USE_CUDA
