@@ -7,6 +7,7 @@
 
 #include <LightGBM/network.h>
 #include <LightGBM/objective_function.h>
+
 #include "exponential_family/distribution.hpp"
 #include "exponential_family/link.hpp"
 
@@ -542,8 +543,6 @@ namespace LightGBM
     std::function<bool(label_t)> is_pos_;
     bool need_train_;
     const bool deterministic_;
-    // ExponentialFamilyDistribution* distribution_;
-    // ExponentialFamilyLink* link_;
     std::unique_ptr<ExponentialFamilyDistribution> distribution_;
     std::shared_ptr<ExponentialFamilyLink> link_;
   };

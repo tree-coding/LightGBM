@@ -45,7 +45,7 @@ namespace LightGBM
       {
         return -std::log(link_->Inverse(score));
       }
-      return -std::log(1 - link_->Inverse(score));
+      return -std::log1p(-link_->Inverse(score));
     }
 
     double inline NegativeLogLikelihoodFirstDerivative(const float &actual, const double &score) override
@@ -79,25 +79,17 @@ namespace LightGBM
     }
     double inline NegativeLogLikelihood(const float &actual, const double &score) override
     {
-      if (actual > 0)
-      {
-        return -std::log(link_->Inverse(score));
-      }
-      return -std::log(1 - link_->Inverse(score));
+      return 0.5f * ((actual - link_->Inverse(score)) * (actual - link_->Inverse(score)) + std::log(2 * M_PI));
     }
 
     double inline NegativeLogLikelihoodFirstDerivative(const float &actual, const double &score) override
     {
-      double const binary = actual > 0 ? 1 : 0;
-      return -link_->InverseFirstDerivative(score) / (link_->Inverse(score) - 1 + binary);
+      return link_->InverseFirstDerivative(score) * (link_->Inverse(score) - actual);
     }
     double inline NegativeLogLikelihoodSecondDerivative(const float &actual, const double &score) override
     {
-      double const binary = actual > 0 ? 1 : 0;
-      double const intermediate = link_->Inverse(score) - 1 + binary;
-      double const link_first_derivative = link_->InverseFirstDerivative(score);
-
-      return -(intermediate * link_->InverseSecondDerivative(score) - (link_first_derivative * link_first_derivative)) / (intermediate * intermediate);
+      const double link_first_derivate = link_->InverseFirstDerivative(score);
+      return (link_->Inverse(score) - actual) * link_->InverseSecondDerivative(score) + link_first_derivate * link_first_derivate;
     }
   };
 

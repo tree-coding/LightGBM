@@ -248,7 +248,7 @@ namespace LightGBM
         ~PowerAbsLink() {}
         const char *GetName() const override
         {
-            return "power";
+            return "powerabs";
         }
         inline double Function(const double &prediction) override
         {
