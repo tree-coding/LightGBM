@@ -266,23 +266,23 @@ namespace LightGBM
       auto const link_name = config.exponential_family_link;
       if (link_name == "canonical" || link_name == "logit")
       {
-        link_ = std::shared_ptr<Logit>(new Logit());
+        link_ = std::shared_ptr<LogitLink>(new LogitLink());
       }
       else if (link_name == "probit")
       {
-        link_ = std::shared_ptr<Probit>(new Probit());
+        link_ = std::shared_ptr<ProbitLink>(new ProbitLink());
       }
       else if (link_name == "cauchit")
       {
-        link_ = std::shared_ptr<Cauchit>(new Cauchit());
+        link_ = std::shared_ptr<CauchitLink>(new CauchitLink());
       }
       else if (link_name == "cloglog")
       {
-        link_ = std::shared_ptr<CLogLog>(new CLogLog());
+        link_ = std::shared_ptr<CLogLogLink>(new CLogLogLink());
       }
       else if (link_name == "loglog")
       {
-        link_ = std::shared_ptr<LogLog>(new LogLog());
+        link_ = std::shared_ptr<LogLogLink>(new LogLogLink());
       }
       else
       {
@@ -336,23 +336,23 @@ namespace LightGBM
 
       if (link_name == "canonical" || link_name == "logit")
       {
-        link_ = std::shared_ptr<Logit>(new Logit());
+        link_ = std::shared_ptr<LogitLink>(new LogitLink());
       }
       else if (link_name == "probit")
       {
-        link_ = std::shared_ptr<Probit>(new Probit());
+        link_ = std::shared_ptr<ProbitLink>(new ProbitLink());
       }
       else if (link_name == "cauchit")
       {
-        link_ = std::shared_ptr<Cauchit>(new Cauchit());
+        link_ = std::shared_ptr<CauchitLink>(new CauchitLink());
       }
       else if (link_name == "cloglog")
       {
-        link_ = std::shared_ptr<CLogLog>(new CLogLog());
+        link_ = std::shared_ptr<CLogLogLink>(new CLogLogLink());
       }
       else if (link_name == "loglog")
       {
-        link_ = std::shared_ptr<LogLog>(new LogLog());
+        link_ = std::shared_ptr<LogLogLink>(new LogLogLink());
       }
       else
       {

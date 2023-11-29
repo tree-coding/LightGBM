@@ -24,11 +24,11 @@ namespace LightGBM
         virtual double InverseSecondDerivative(const double &) = 0;
     };
 
-    class Identity : public ExponentialFamilyLink
+    class IdentityLink : public ExponentialFamilyLink
     {
     public:
-        Identity() {}
-        ~Identity() {}
+        IdentityLink() {}
+        ~IdentityLink() {}
         const char *GetName() const override
         {
             return "identity";
@@ -43,22 +43,22 @@ namespace LightGBM
             return score;
         }
 
-        inline double InverseFirstDerivative(const double &score) override
+        inline double InverseFirstDerivative(const double &) override
         {
             return 1.0f;
         }
 
-        inline double InverseSecondDerivative(const double &score) override
+        inline double InverseSecondDerivative(const double &) override
         {
             return 0.0f;
         }
     };
 
-    class Log : public ExponentialFamilyLink
+    class LogLink : public ExponentialFamilyLink
     {
     public:
-        Log() {}
-        ~Log() {}
+        LogLink() {}
+        ~LogLink() {}
         const char *GetName() const override
         {
             return "log";
@@ -84,11 +84,11 @@ namespace LightGBM
         }
     };
 
-    class Log1p : public ExponentialFamilyLink
+    class Log1pLink : public ExponentialFamilyLink
     {
     public:
-        Log1p() {}
-        ~Log1p() {}
+        Log1pLink() {}
+        ~Log1pLink() {}
         const char *GetName() const override
         {
             return "log1p";
@@ -114,11 +114,11 @@ namespace LightGBM
         }
     };
 
-    class Sqrt : public ExponentialFamilyLink
+    class SqrtLink : public ExponentialFamilyLink
     {
     public:
-        Sqrt() {}
-        ~Sqrt() {}
+        SqrtLink() {}
+        ~SqrtLink() {}
         const char *GetName() const override
         {
             return "sqrt";
@@ -144,11 +144,143 @@ namespace LightGBM
         }
     };
 
-    class Logit : public ExponentialFamilyLink
+    class InverseLink : public ExponentialFamilyLink
     {
     public:
-        Logit() {}
-        ~Logit() {}
+        InverseLink() {}
+        ~InverseLink() {}
+        const char *GetName() const override
+        {
+            return "inverse";
+        }
+        inline double Function(const double &prediction) override
+        {
+            return 1.0f / prediction;
+        }
+
+        inline double Inverse(const double &score) override
+        {
+            return 1.0f / score;
+        }
+
+        inline double InverseFirstDerivative(const double &score) override
+        {
+            return -1.0f / (score * score);
+        }
+
+        inline double InverseSecondDerivative(const double &score) override
+        {
+            return 2.0f / (score * score * score);
+        }
+    };
+
+    class InverseSquareLink : public ExponentialFamilyLink
+    {
+    public:
+        InverseSquareLink() {}
+        ~InverseSquareLink() {}
+        const char *GetName() const override
+        {
+            return "inversesquare";
+        }
+        inline double Function(const double &prediction) override
+        {
+            return 1.0f / (prediction * prediction);
+        }
+
+        inline double Inverse(const double &score) override
+        {
+            return 1.0f / std::sqrt(score);
+        }
+
+        inline double InverseFirstDerivative(const double &score) override
+        {
+            return -0.5f / (score * std::sqrt(score));
+        }
+
+        inline double InverseSecondDerivative(const double &score) override
+        {
+            return 0.75f / (score * score * std::sqrt(score));
+        }
+    };
+
+    class PowerLink : public ExponentialFamilyLink
+    {
+    public:
+        PowerLink() {}
+        PowerLink(const double &power) : power_(power), inverse_power_(power == 0 ? 0.0f : 1.0f / power) {}
+        ~PowerLink() {}
+        const char *GetName() const override
+        {
+            return "power";
+        }
+        inline double Function(const double &prediction) override
+        {
+            return std::pow(prediction, power_);
+        }
+
+        inline double Inverse(const double &score) override
+        {
+            return std::pow(score, inverse_power_);
+        }
+
+        inline double InverseFirstDerivative(const double &score) override
+        {
+            return inverse_power_ * std::pow(score, inverse_power_ - 1);
+            ;
+        }
+
+        inline double InverseSecondDerivative(const double &score) override
+        {
+            return inverse_power_ * (inverse_power_ - 1) * std::pow(score, inverse_power_ - 2);
+        }
+
+    private:
+        const double power_ = 1.0;
+        const double inverse_power_ = 1.0;
+    };
+
+    class PowerAbsLink : public ExponentialFamilyLink
+    {
+    public:
+        PowerAbsLink() {}
+        PowerAbsLink(const double &power) : power_(power), inverse_power_(power == 0 ? 0.0f : 1.0f / power) {}
+        ~PowerAbsLink() {}
+        const char *GetName() const override
+        {
+            return "power";
+        }
+        inline double Function(const double &prediction) override
+        {
+            return Common::Sign(prediction) * std::pow(std::fabs(prediction), power_);
+        }
+
+        inline double Inverse(const double &score) override
+        {
+            return Common::Sign(score) * std::pow(std::fabs(score), inverse_power_);
+        }
+
+        inline double InverseFirstDerivative(const double &score) override
+        {
+            return inverse_power_ * std::pow(std::fabs(score), inverse_power_ - 1);
+            ;
+        }
+
+        inline double InverseSecondDerivative(const double &score) override
+        {
+            return Common::Sign(score) * inverse_power_ * (inverse_power_ - 1) * std::pow(std::fabs(score), inverse_power_ - 2);
+        }
+
+    private:
+        const double power_ = 1.0;
+        const double inverse_power_ = 1.0;
+    };
+
+    class LogitLink : public ExponentialFamilyLink
+    {
+    public:
+        LogitLink() {}
+        ~LogitLink() {}
         const char *GetName() const override
         {
             return "logit";
@@ -176,11 +308,11 @@ namespace LightGBM
         }
     };
 
-    class Probit : public ExponentialFamilyLink
+    class ProbitLink : public ExponentialFamilyLink
     {
     public:
-        Probit() {}
-        ~Probit() {}
+        ProbitLink() {}
+        ~ProbitLink() {}
         const char *GetName() const override
         {
             return "probit";
@@ -206,11 +338,11 @@ namespace LightGBM
         }
     };
 
-    class Cauchit : public ExponentialFamilyLink
+    class CauchitLink : public ExponentialFamilyLink
     {
     public:
-        Cauchit() {}
-        ~Cauchit() {}
+        CauchitLink() {}
+        ~CauchitLink() {}
         const char *GetName() const override
         {
             return "cauchit";
@@ -237,11 +369,11 @@ namespace LightGBM
         }
     };
 
-    class CLogLog : public ExponentialFamilyLink
+    class CLogLogLink : public ExponentialFamilyLink
     {
     public:
-        CLogLog() {}
-        ~CLogLog() {}
+        CLogLogLink() {}
+        ~CLogLogLink() {}
         const char *GetName() const override
         {
             return "cloglog";
@@ -267,11 +399,11 @@ namespace LightGBM
         }
     };
 
-    class LogLog : public ExponentialFamilyLink
+    class LogLogLink : public ExponentialFamilyLink
     {
     public:
-        LogLog() {}
-        ~LogLog() {}
+        LogLogLink() {}
+        ~LogLogLink() {}
         const char *GetName() const override
         {
             return "loglog";
