@@ -1166,7 +1166,6 @@ namespace LightGBM
         }
       }
       // TODO: is this appropriate for all expoential families?
-      // TODO: should we transform then take average?
       return link_->Function(suml / sumw);
     }
 

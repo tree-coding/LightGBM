@@ -467,3 +467,11 @@ tests/testlightgbm
 higgs.test
 higgs.train
 LightGBM_model.txt
+exp_data.train
+exp_data.validate
+identity_data.train
+identity_data.validate
+inv_data.train
+inv_data.validate
+squared_data.train
+squared_data.validate
