@@ -100,6 +100,8 @@ Core Parameters
    -  binary classification application
 
       -  ``binary``, binary `log loss <https://en.wikipedia.org/wiki/Cross_entropy>`__ classification (or logistic regression)
+      
+      - ``probit``, binary classification with probit link function `<https://en.wikipedia.org/wiki/Probit_model>`.
 
       - ``exponential_family_binary``, Exponential family classification `<https://en.wikipedia.org/wiki/Exponential_family>` with user specified link function.
 

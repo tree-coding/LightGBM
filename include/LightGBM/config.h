@@ -141,6 +141,7 @@ struct Config {
   // descl2 = ``exponential_family_regression``, Exponential family regression `<https://en.wikipedia.org/wiki/Exponential_family>` with user specified link function.
   // desc = binary classification application
   // descl2 = ``binary``, binary `log loss <https://en.wikipedia.org/wiki/Cross_entropy>`__ classification (or logistic regression)
+  // descl2 = ``probit``, binary classification with probit link function `<https://en.wikipedia.org/wiki/Probit_model>`.
   // descl2 = ``exponential_family_binary``, Exponential family classification `<https://en.wikipedia.org/wiki/Exponential_family>` with user specified link function.
   // descl2 = requires labels in {0, 1}; see ``cross-entropy`` application for general probability labels in [0, 1]
   // desc = multi-class classification application

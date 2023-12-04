@@ -10,7 +10,9 @@
 
 #include "exponential_family/distribution.hpp"
 #include "exponential_family/link.hpp"
+#include <boost/math/distributions/normal.hpp>
 
+#define _USE_MATH_DEFINES
 #include <string>
 #include <algorithm>
 #include <cmath>
@@ -256,12 +258,93 @@ namespace LightGBM
     const bool deterministic_;
   };
 
-  class BinaryExponentialFamilyLoss : public ObjectiveFunction
+  class ProbitLogloss : public BinaryLogloss
+  {
+  public:
+    explicit ProbitLogloss(const Config &config,
+                           std::function<bool(label_t)> is_pos = nullptr) : BinaryLogloss(config, is_pos)
+    {
+    }
+
+    explicit ProbitLogloss(const std::vector<std::string> &strs)
+        : BinaryLogloss(strs)
+    {
+    }
+
+    ~ProbitLogloss() {}
+
+    void GetGradients(const double *score, score_t *gradients, score_t *hessians) const override
+    {
+      if (!need_train_)
+      {
+        return;
+      }
+      if (weights_ == nullptr)
+      {
+#pragma omp parallel for num_threads(OMP_NUM_THREADS()) schedule(static)
+        for (data_size_t i = 0; i < num_data_; ++i)
+        {
+          // get label and label weights
+          const int is_pos = is_pos_(label_[i]);
+          const int label = label_val_[is_pos];
+          const double label_weight = label_weights_[is_pos];
+          // calculate gradients and hessians
+          const double response = -label * sigmoid_ * std::exp(-0.5f * sigmoid_ * sigmoid_ * score[i] * score[i]) / (std::sqrt(M_PI_2) * erfc(-M_SQRT1_2 * sigmoid_ * label * score[i]));
+          gradients[i] = static_cast<score_t>(response * label_weight);
+          hessians[i] = static_cast<score_t>(-response * (sigmoid_ * score[i] - response) * label_weight);
+        }
+      }
+      else
+      {
+#pragma omp parallel for num_threads(OMP_NUM_THREADS()) schedule(static)
+        for (data_size_t i = 0; i < num_data_; ++i)
+        {
+          // get label and label weights
+          const int is_pos = is_pos_(label_[i]);
+          const int label = label_val_[is_pos];
+          const double label_weight = label_weights_[is_pos];
+          // calculate gradients and hessians
+          const double response = -label * sigmoid_ * std::exp(-0.5f * sigmoid_ * sigmoid_ * score[i] * score[i]) / (std::sqrt(M_PI_2) * erfc(-M_SQRT1_2 * sigmoid_ * label * score[i]));
+          const double abs_response = fabs(response);
+          gradients[i] = static_cast<score_t>(response * label_weight * weights_[i]);
+          hessians[i] = static_cast<score_t>(abs_response * (sigmoid_ * score[i] + abs_response) * label_weight * weights_[i]);
+        }
+      }
+    }
+
+    const char *GetName() const override
+    {
+      return "probit";
+    }
+
+    void ConvertOutput(const double *input, double *output) const override
+    {
+      output[0] = 0.5 * erfc(-sigmoid_ * input[0] * M_SQRT1_2);
+    }
+
+    double BoostFromScore(int) const override
+    {
+      auto logit_score = BinaryLogloss::BoostFromScore(0);
+      double pavg;
+      BinaryLogloss::ConvertOutput(&logit_score, &pavg);
+      return boost::math::quantile(boost::math::normal(0.0, 1.0), pavg);
+    }
+
+    std::string ToString() const override
+    {
+      std::stringstream str_buf;
+      str_buf << GetName() << " ";
+      str_buf << "sigmoid:" << sigmoid_;
+      return str_buf.str();
+    }
+  };
+
+  class BinaryExponentialFamilyLoss : public BinaryLogloss
   {
   public:
     explicit BinaryExponentialFamilyLoss(const Config &config,
                                          std::function<bool(label_t)> is_pos = nullptr)
-        : deterministic_(config.deterministic)
+        : BinaryLogloss(config, is_pos), deterministic_(config.deterministic)
     {
 
       auto const link_name = config.exponential_family_link;
@@ -315,7 +398,7 @@ namespace LightGBM
     }
 
     explicit BinaryExponentialFamilyLoss(const std::vector<std::string> &strs)
-        : deterministic_(false)
+        : BinaryLogloss(strs), deterministic_(false)
     {
       std::string distribution_name = "";
       std::string link_name = "";
